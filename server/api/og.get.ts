@@ -17,7 +17,7 @@ export default defineEventHandler(async (event) => {
         
         <!-- Title -->
         <text x="600" y="200" text-anchor="middle" fill="white" font-family="system-ui, sans-serif" font-size="56" font-weight="bold">
-          TrumpTier
+          Trumptier
         </text>
         
         <!-- Subtitle -->

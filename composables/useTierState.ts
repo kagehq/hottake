@@ -81,6 +81,20 @@ export const useTierState = () => {
 
   function load(newState: TierState) { state.value = newState; }
 
+  function deleteItem(itemId: string) {
+    // Remove from all tier placements
+    Object.keys(state.value.placement).forEach(tier => {
+      const tierKey = tier as TierKey;
+      const index = state.value.placement[tierKey].indexOf(itemId);
+      if (index > -1) {
+        state.value.placement[tierKey].splice(index, 1);
+      }
+    });
+    
+    // Remove from items
+    delete state.value.items[itemId];
+  }
+
   function clearData() {
     if (typeof window !== 'undefined') {
       localStorage.removeItem('tierlist-data');
@@ -101,5 +115,5 @@ export const useTierState = () => {
     }, { deep: true });
   }
 
-  return { state, addTextItems, addImageItem, addUrlItem, load, clearData };
+  return { state, addTextItems, addImageItem, addUrlItem, load, clearData, deleteItem };
 };

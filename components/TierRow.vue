@@ -12,7 +12,7 @@
       item-key="id"
       @change="noop">
       <template #item="{ element }">
-        <ItemTile v-if="items[element]" :item="items[element]" />
+        <ItemTile v-if="items[element]" :item="items[element]" @delete="handleDelete" />
       </template>
     </draggable>
     
@@ -21,7 +21,7 @@
       v-else-if="!readonly"
       class="flex flex-wrap items-center gap-1 p-2 bg-gray-500/10 border border-gray-50/10">
       <template v-for="element in ids" :key="element">
-        <ItemTile v-if="items[element]" :item="items[element]" />
+        <ItemTile v-if="items[element]" :item="items[element]" @delete="handleDelete" />
       </template>
     </div>
     
@@ -30,7 +30,7 @@
       v-else
       class="flex flex-wrap gap-1 p-2 bg-gray-500/10 border border-gray-50/10">
       <template v-for="element in ids" :key="element">
-        <ItemTile v-if="items[element]" :item="items[element]" />
+        <ItemTile v-if="items[element]" :item="items[element]" @delete="handleDelete" />
       </template>
     </div>
   </div>
@@ -43,6 +43,7 @@ import ItemTile from "./ItemTile.vue";
 import type { TierKey, TierState } from "@/types/tier";
 
 const props = defineProps<{ tier: TierKey, state: TierState, readonly?: boolean, isLast?: boolean }>();
+const emit = defineEmits<{ delete: [itemId: string] }>();
 const isMounted = ref(false);
 
 const items = computed(() => props.state.items);
@@ -60,4 +61,8 @@ onMounted(() => {
 });
 
 function noop() {}
+
+function handleDelete(itemId: string) {
+  emit('delete', itemId);
+}
 </script>

@@ -28,13 +28,15 @@
       </header>
 
       <!-- Tier List Display -->
-      <section v-if="tierListData" class="space-y-3">
+      <section v-if="tierListData" class="">
         <TierRow v-for="tier in tierListData.state.tiers" 
                  :key="tier" 
                  :tier="tier" 
                  :state="tierListData.state" 
                  :readonly="true" />
       </section>
+
+
 
       <!-- Loading State -->
       <div v-else-if="pending" class="flex items-center justify-center py-12">
@@ -45,6 +47,8 @@
       <div v-else-if="error" class="flex items-center justify-center py-12">
         <div class="text-red-400">Failed to load tier list</div>
       </div>
+
+      
     </div>
   </div>
 </template>

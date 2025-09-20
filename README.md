@@ -1,4 +1,4 @@
-# TrumpTier
+# Trumptier
 
 Create and share beautiful tier lists with drag and drop. Rank anything from programming languages to pizza toppings!
 

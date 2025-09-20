@@ -46,7 +46,7 @@
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
             </svg>
-            Export
+            {{ exportButtonText }}
           </button>
           <span class="text-gray-500/60">|</span>
           <button @click="resetBoard" class="px-4 py-2 bg-gray-500/15 hover:bg-gray-500/20 text-gray-500 hover:text-white rounded-xl border border-gray-500/10 transition-all duration-200 font-medium text-sm flex items-center gap-2">
@@ -59,7 +59,7 @@
       </header>
 
       <section id="board" class="inner-container mb-[-1px] ml-[-1px] relative border border-gray-500/25">
-        <TierRow v-for="(t, index) in state.tiers" :key="t" :tier="t" :state="state" :isLast="index === state.tiers.length - 1" />
+        <TierRow v-for="(t, index) in state.tiers" :key="t" :tier="t" :state="state" :isLast="index === state.tiers.length - 1" @delete="deleteItem" />
         <span
           class="main-section bottom-l absolute w-[1px] h-[1px] bottom-[-1px] left-[-1px]"
         ></span
@@ -73,6 +73,7 @@
           class="main-section bottom-l absolute w-[1px] h-[1px] top-[-1px] left-[-1px]"
         ></span>
       </section>
+
 
       <section class="mt-8 space-y-6">
         <div class="text-center">
@@ -163,12 +164,13 @@ import { encodeState, decodeState } from "~/utils/lz";
 import html2canvas from "html2canvas";
 import TierRow from "~/components/TierRow.vue";
 
-const { state, addTextItems, addImageItem, addUrlItem, load, clearData } = useTierState();
+const { state, addTextItems, addImageItem, addUrlItem, load, clearData, deleteItem } = useTierState();
 const raw = ref("");
 const url = ref("");
 
 const shareUrl = ref("");
 const shareButtonText = ref("Share");
+const exportButtonText = ref("Export");
 
 onMounted(async () => {
   // Update share URL with full URL
@@ -259,22 +261,49 @@ function addUrl(){ if (url.value) { addUrlItem(url.value); url.value=""; } }
 
 async function exportPng(){
   try {
+    exportButtonText.value = "Exporting...";
+    
     const el = document.getElementById("board");
     if (!el) {
-      alert("Could not find the tier list to export");
+      exportButtonText.value = "Failed";
+      setTimeout(() => { exportButtonText.value = "Export"; }, 2000);
       return;
     }
+    
+    // Temporarily adjust styles for better capture
+    const originalOverflow = el.style.overflow;
+    const originalHeight = el.style.height;
+    const originalMaxWidth = el.style.maxWidth;
+    el.style.overflow = 'visible';
+    el.style.height = 'auto';
+    el.style.maxWidth = 'none';
     
     const canvas = await html2canvas(el, { 
       backgroundColor: "#0a0a0a", 
       scale: 2,
       useCORS: true,
-      allowTaint: true
+      allowTaint: true,
+      scrollX: 0,
+      scrollY: 0,
+      width: el.scrollWidth,
+      height: el.scrollHeight,
+      windowWidth: el.scrollWidth,
+      windowHeight: el.scrollHeight,
+      ignoreElements: (element) => {
+        // Ignore the decorative corner elements
+        return element.classList.contains('main-section');
+      }
     });
+    
+    // Restore original styles
+    el.style.overflow = originalOverflow;
+    el.style.height = originalHeight;
+    el.style.maxWidth = originalMaxWidth;
     
     const blob = await new Promise<Blob|null>(resolve => canvas.toBlob(resolve, 'image/png'));
     if (!blob) {
-      alert("Failed to create image");
+      exportButtonText.value = "Failed";
+      setTimeout(() => { exportButtonText.value = "Export"; }, 2000);
       return;
     }
     
@@ -287,10 +316,12 @@ async function exportPng(){
     document.body.removeChild(link);
     URL.revokeObjectURL(downloadUrl);
     
-    alert("Tier list exported successfully!");
+    exportButtonText.value = "Exported!";
+    setTimeout(() => { exportButtonText.value = "Export"; }, 2000);
   } catch (error) {
     console.error("Export error:", error);
-    alert("Failed to export tier list. Please try again.");
+    exportButtonText.value = "Failed";
+    setTimeout(() => { exportButtonText.value = "Export"; }, 2000);
   }
 }
 async function shareTierList(){
@@ -332,10 +363,10 @@ function resetBoard(){
 
 // SEO meta tags for the main page
 useHead({
-  title: 'TrumpTier - Create and Share Tier Lists',
+  title: 'Trumptier - Create and Share Tier Lists',
   meta: [
     { name: 'description', content: 'Create beautiful tier lists with drag and drop. Share your rankings with friends and discover what others think. Free tier list maker with custom categories.' },
-    { property: 'og:title', content: 'TrumpTier - Create and Share Tier Lists' },
+    { property: 'og:title', content: 'Trumptier - Create and Share Tier Lists' },
     { property: 'og:description', content: 'Create beautiful tier lists with drag and drop. Share your rankings with friends and discover what others think. Free tier list maker with custom categories.' },
     { property: 'og:image', content: '/api/og?default=true' },
     { property: 'og:image:width', content: '1200' },
@@ -343,7 +374,7 @@ useHead({
     { property: 'og:type', content: 'website' },
     { property: 'og:url', content: 'https://trumptier.com' },
     { name: 'twitter:card', content: 'summary_large_image' },
-    { name: 'twitter:title', content: 'TrumpTier - Create and Share Tier Lists' },
+    { name: 'twitter:title', content: 'Trumptier - Create and Share Tier Lists' },
     { name: 'twitter:description', content: 'Create beautiful tier lists with drag and drop. Share your rankings with friends and discover what others think. Free tier list maker with custom categories.' },
     { name: 'twitter:image', content: '/api/og?default=true' },
     { name: 'keywords', content: 'tier list, ranking, drag and drop, share, create, free, online tool' },

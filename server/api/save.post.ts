@@ -22,18 +22,12 @@ export default defineEventHandler(async (event) => {
       updatedAt: new Date().toISOString()
     };
 
-    // Store the tier list data in memory and file system
-    // In a real app, you'd save this to a database
-    if (!global.tierListStore) {
-      global.tierListStore = new Map();
-    }
-    global.tierListStore.set(id, tierListData);
-    
-    // Also save to file system for persistence
+    // Store the tier list data in the JSON file
     try {
       const fs = await import('fs/promises');
       const path = await import('path');
       const dataDir = path.join(process.cwd(), 'data');
+      const tierListsFile = path.join(dataDir, 'tierlists.json');
       
       // Create data directory if it doesn't exist
       try {
@@ -42,11 +36,34 @@ export default defineEventHandler(async (event) => {
         // Directory already exists
       }
       
-      // Save tier list to file
-      const filePath = path.join(dataDir, `${id}.json`);
-      await fs.writeFile(filePath, JSON.stringify(tierListData, null, 2));
+      // Read existing tier lists
+      let allTierLists = {};
+      try {
+        const existingData = await fs.readFile(tierListsFile, 'utf-8');
+        allTierLists = JSON.parse(existingData);
+      } catch (e) {
+        // File doesn't exist yet, start with empty object
+      }
+      
+      // Add new tier list
+      allTierLists[id] = tierListData;
+      
+      // Write back to file
+      await fs.writeFile(tierListsFile, JSON.stringify(allTierLists, null, 2));
+      console.log(`Saved tier list ${id} to tierlists.json`);
+      
+      // Also store in memory for faster access
+      if (!global.tierListStore) {
+        global.tierListStore = new Map();
+      }
+      global.tierListStore.set(id, tierListData);
+      
     } catch (error) {
-      console.warn('Failed to save to file system:', error);
+      console.error(`Failed to save tier list ${id}:`, error);
+      throw createError({
+        statusCode: 500,
+        statusMessage: 'Failed to save tier list'
+      });
     }
     
     return {
