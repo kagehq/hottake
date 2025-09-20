@@ -239,7 +239,7 @@ onMounted(async () => {
     try {
       const response = await $fetch(`/api/tierlist/${route.query.remix}`);
       if (response.success && response.data) {
-        load(response.data.state);
+        load((response.data as any).state);
         // Clear the remix parameter from URL
         await navigateTo('/', { replace: true });
       }
@@ -254,7 +254,7 @@ onMounted(async () => {
     try {
       const response = await $fetch(`/api/tierlist/${tierListId}`);
       if (response.success && response.data) {
-        load(response.data.state);
+        load((response.data as any).state);
         // Redirect to main page to edit
         await navigateTo('/', { replace: true });
       }
@@ -395,8 +395,22 @@ async function shareTierList(){
     
     if (response.success) {
       const publicUrl = `${window.location.origin}/tierlist/${response.id}`;
-      await navigator.clipboard.writeText(publicUrl);
-      shareButtonText.value = "Copied!";
+      
+      // Try modern clipboard API first
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        try {
+          await navigator.clipboard.writeText(publicUrl);
+          shareButtonText.value = "Copied!";
+        } catch (clipboardError) {
+          // Fallback to legacy method for Safari
+          fallbackCopyToClipboard(publicUrl);
+          shareButtonText.value = "Copied!";
+        }
+      } else {
+        // Fallback for older browsers
+        fallbackCopyToClipboard(publicUrl);
+        shareButtonText.value = "Copied!";
+      }
       
       // Reset button text after 2 seconds
       setTimeout(() => {
@@ -412,6 +426,26 @@ async function shareTierList(){
       shareButtonText.value = "Share";
     }, 2000);
   }
+}
+
+// Fallback copy method that works in Safari
+function fallbackCopyToClipboard(text: string) {
+  const textArea = document.createElement('textarea');
+  textArea.value = text;
+  textArea.style.position = 'fixed';
+  textArea.style.left = '-999999px';
+  textArea.style.top = '-999999px';
+  document.body.appendChild(textArea);
+  textArea.focus();
+  textArea.select();
+  
+  try {
+    document.execCommand('copy');
+  } catch (err) {
+    console.error('Fallback copy failed:', err);
+  }
+  
+  document.body.removeChild(textArea);
 }
 function resetBoard(){
   clearData();

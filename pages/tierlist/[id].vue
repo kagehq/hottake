@@ -10,6 +10,13 @@
           </div>
         </div>
         <div class="flex flex-wrap items-center space-x-4">
+          <!-- <button @click="shareTierList" 
+                  class="px-4 py-2 bg-green-300 hover:bg-green-400 text-black rounded-xl border border-green-300 transition-all duration-200 font-medium text-sm flex items-center gap-2">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.367 2.684 3 3 0 00-5.367-2.684z"></path>
+            </svg>
+            {{ shareButtonText }}
+          </button> -->
           <button @click="remixTierList" 
                   class="px-4 py-2 bg-blue-300 hover:bg-blue-400 text-black rounded-xl border border-blue-300 transition-all duration-200 font-medium text-sm flex items-center gap-2">
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -157,7 +164,10 @@ const tierListId = route.params.id as string;
 
 // Fetch tier list data
 const { data: response, pending, error } = await useFetch(`/api/tierlist/${tierListId}`);
-const tierListData = computed(() => response.value?.data);
+const tierListData = computed(() => response.value?.data as any);
+
+// Share button state
+const shareButtonText = ref("Share");
 
 // Remix functionality
 async function remixTierList() {
@@ -188,6 +198,64 @@ async function remixTierList() {
     console.error('Failed to remix tier list:', error);
     alert('Failed to remix tier list. Please try again.');
   }
+}
+
+// Share functionality
+async function shareTierList() {
+  try {
+    shareButtonText.value = "Sharing...";
+    
+    const currentUrl = window.location.href;
+    
+    // Try modern clipboard API first
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      try {
+        await navigator.clipboard.writeText(currentUrl);
+        shareButtonText.value = "Copied!";
+      } catch (clipboardError) {
+        // Fallback to legacy method for Safari
+        fallbackCopyToClipboard(currentUrl);
+        shareButtonText.value = "Copied!";
+      }
+    } else {
+      // Fallback for older browsers
+      fallbackCopyToClipboard(currentUrl);
+      shareButtonText.value = "Copied!";
+    }
+    
+    // Reset button text after 2 seconds
+    setTimeout(() => {
+      shareButtonText.value = "Share";
+    }, 2000);
+  } catch (error) {
+    console.error('Failed to share tier list:', error);
+    shareButtonText.value = "Failed";
+    
+    // Reset button text after 2 seconds
+    setTimeout(() => {
+      shareButtonText.value = "Share";
+    }, 2000);
+  }
+}
+
+// Fallback copy method that works in Safari
+function fallbackCopyToClipboard(text: string) {
+  const textArea = document.createElement('textarea');
+  textArea.value = text;
+  textArea.style.position = 'fixed';
+  textArea.style.left = '-999999px';
+  textArea.style.top = '-999999px';
+  document.body.appendChild(textArea);
+  textArea.focus();
+  textArea.select();
+  
+  try {
+    document.execCommand('copy');
+  } catch (err) {
+    console.error('Fallback copy failed:', err);
+  }
+  
+  document.body.removeChild(textArea);
 }
 
 // Copy URL functionality
