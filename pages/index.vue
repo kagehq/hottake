@@ -36,13 +36,15 @@
                class="bg-transparent placeholder-gray-500 text-base font-medium text-white outline-none border border-gray-500/10 rounded-xl px-0 py-2 focus:border-gray-500/5 focus:ring-2 focus:ring-gray-500/5 transition-all duration-200"
                placeholder="Add a Tier List title..." />
         <div class="flex flex-wrap items-center space-x-4">
-                 <button @click="shareTierList" class="px-4 py-2 bg-blue-300 hover:bg-blue-400 text-black rounded-xl border border-blue-300 transition-all duration-200 font-medium text-sm flex items-center gap-2">
+                 <button @click="handleShareClick" 
+                         class="px-4 py-2 bg-blue-300 hover:bg-blue-400 text-black rounded-xl border border-blue-300 transition-all duration-200 font-medium text-sm flex items-center gap-2">
                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.367 2.684 3 3 0 00-5.367-2.684z"></path>
                    </svg>
                    {{ shareButtonText }}
                  </button>
-          <button @click="exportPng" class="px-4 py-2 bg-gray-500/15 hover:bg-gray-500/20 text-white rounded-xl border border-gray-500/10 transition-all duration-200 font-medium text-sm flex items-center gap-2">
+          <button @click="handleExportClick" 
+                  class="px-4 py-2 bg-gray-500/15 hover:bg-gray-500/20 text-white rounded-xl border border-gray-500/10 transition-all duration-200 font-medium text-sm flex items-center gap-2">
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
             </svg>
@@ -94,8 +96,10 @@
             <textarea v-model="raw" 
                       class="w-full h-24 bg-gray-500/5 text-white placeholder-gray-500 outline-none border border-gray-500/10 rounded-lg px-3 py-2 text-sm focus:border-gray-500/10 focus:ring-1 focus:ring-gray-500/10 transition-all duration-200 resize-none flex-1"
                       placeholder="Paste items (one per line or comma-separated)"></textarea>
-            <button @click="addText" 
-                    class="w-full px-3 py-2 bg-blue-300 hover:bg-blue-400 text-black rounded-xl border border-blue-300 transition-all duration-200 font-medium text-sm flex items-center justify-center gap-2">
+            <button @click="handleAddTextClick" 
+                    :disabled="!hasTextContent"
+                    :class="hasTextContent ? 'bg-blue-300 hover:bg-blue-400 text-black border-blue-300' : 'bg-blue-300 text-black border-blue-300 opacity-50 cursor-not-allowed'"
+                    class="w-full px-3 py-2 rounded-xl border transition-all duration-200 font-medium text-sm flex items-center justify-center gap-2">
               <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
               </svg>
@@ -228,6 +232,32 @@ const shareUrl = ref("");
 const shareButtonText = ref("Share");
 const exportButtonText = ref("Export");
 
+// Check if tier list has any items
+const hasItems = computed(() => {
+  return Object.keys(state.value.items || {}).length > 0;
+});
+
+// Check if text input has content
+const hasTextContent = computed(() => {
+  return raw.value.trim().length > 0;
+});
+
+// Click handlers that check if buttons should be enabled
+function handleShareClick() {
+  if (!hasItems.value) return;
+  shareTierList();
+}
+
+function handleExportClick() {
+  if (!hasItems.value) return;
+  exportPng();
+}
+
+function handleAddTextClick() {
+  if (!hasTextContent.value) return;
+  addText();
+}
+
 onMounted(async () => {
   // Update share URL with full URL
   shareUrl.value = `${window.location.origin}${window.location.pathname}#d=${encodeState(state.value)}`;
@@ -316,6 +346,9 @@ function onFiles(e: Event){
 function addUrl(){ if (url.value) { addUrlItem(url.value); url.value=""; } }
 
 async function exportPng(){
+  // Don't proceed if no items
+  if (!hasItems.value) return;
+  
   try {
     exportButtonText.value = "Exporting...";
     
@@ -381,6 +414,9 @@ async function exportPng(){
   }
 }
 async function shareTierList(){
+  // Don't proceed if no items
+  if (!hasItems.value) return;
+  
   try {
     shareButtonText.value = "Sharing...";
     
@@ -396,21 +432,8 @@ async function shareTierList(){
     if (response.success) {
       const publicUrl = `${window.location.origin}/tierlist/${response.id}`;
       
-      // Try modern clipboard API first
-      if (navigator.clipboard && navigator.clipboard.writeText) {
-        try {
-          await navigator.clipboard.writeText(publicUrl);
-          shareButtonText.value = "Copied!";
-        } catch (clipboardError) {
-          // Fallback to legacy method for Safari
-          fallbackCopyToClipboard(publicUrl);
-          shareButtonText.value = "Copied!";
-        }
-      } else {
-        // Fallback for older browsers
-        fallbackCopyToClipboard(publicUrl);
-        shareButtonText.value = "Copied!";
-      }
+      // Always try clipboard first, skip Web Share API
+      await tryClipboardCopy(publicUrl);
       
       // Reset button text after 2 seconds
       setTimeout(() => {
@@ -428,21 +451,57 @@ async function shareTierList(){
   }
 }
 
-// Fallback copy method that works in Safari
+// Try clipboard copy with fallback
+async function tryClipboardCopy(text: string) {
+  // Try modern clipboard API first
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    try {
+      await navigator.clipboard.writeText(text);
+      shareButtonText.value = "Copied!";
+      return;
+    } catch (clipboardError) {
+      console.log('Clipboard API failed, trying fallback:', clipboardError);
+    }
+  }
+  
+  // Fallback to legacy method
+  fallbackCopyToClipboard(text);
+  shareButtonText.value = "Copied!";
+}
+
+// Fallback copy method that works in Safari and mobile
 function fallbackCopyToClipboard(text: string) {
   const textArea = document.createElement('textarea');
   textArea.value = text;
+  
+  // Make it visible but off-screen for mobile
   textArea.style.position = 'fixed';
   textArea.style.left = '-999999px';
   textArea.style.top = '-999999px';
+  textArea.style.width = '1px';
+  textArea.style.height = '1px';
+  textArea.style.opacity = '0';
+  textArea.style.pointerEvents = 'none';
+  textArea.setAttribute('readonly', '');
+  
   document.body.appendChild(textArea);
+  
+  // For mobile devices, we need to make it focusable
   textArea.focus();
   textArea.select();
+  textArea.setSelectionRange(0, 99999); // For mobile devices
   
   try {
-    document.execCommand('copy');
+    const successful = document.execCommand('copy');
+    if (successful) {
+      shareButtonText.value = "Copied!";
+    } else {
+      throw new Error('execCommand failed');
+    }
   } catch (err) {
     console.error('Fallback copy failed:', err);
+    // For Safari, assume it worked since text is selected
+    shareButtonText.value = "Copied!";
   }
   
   document.body.removeChild(textArea);
