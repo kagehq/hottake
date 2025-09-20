@@ -74,7 +74,6 @@
         ></span>
       </section>
 
-
       <section class="mt-8 space-y-6">
         <div class="text-center">
           <h2 class="text-base font-semibold text-white mb-1">Add Items</h2>
@@ -154,6 +153,63 @@
           </div> -->
         </div>
       </section>
+
+      <footer aria-labelledby="footer-heading" class="w-full pt-20">
+        <h2 id="footer-heading" class="sr-only">Footer</h2>
+        <div class="mx-auto px-4 md:px-0 md:max-w-2xl pb-4">
+          <div class="flex flex-col md:flex-row items-center justify-between">
+            <a
+              href="https://github.com/kagehq"
+              target="_blank"
+              class="flex items-center justify-center gap-2 text-center relative"
+            >
+              <span class="text-xs leading-[1.6] text-gray-500 font-medium">APO</span>
+              <span class="flex items-center text-sm leading-[1.6] text-white font-bold">
+                <img src="/assets/img/kage-long-blue.png" alt="Kage" class="h-5 kage-logo"/>
+              </span>
+            </a>
+            <!-- <div class="flex items-center relative">
+              <span class="text-ob-gray-color">&copy; 2024 Treadie, Inc.</span>
+            </div> -->
+            <div class="flex space-x-6 items-center md:mt-0 mt-4">
+              <a
+                href="https://discord.gg/KqdBcqRk5E"
+                target="_blank"
+                class="text-sm font-semibold leading-6 text-gray-500 hover:text-blue-300"
+              >
+              <!-- <svg viewBox="0 0 20 20" aria-hidden="true" class="h-5 w-5" fill="currentColor">
+                <path fill-rule="evenodd" clip-rule="evenodd" d="M10 1.667c-4.605 0-8.334 3.823-8.334 8.544 0 3.78 2.385 6.974 5.698 8.106.417.075.573-.182.573-.406 0-.203-.011-.875-.011-1.592-2.093.397-2.635-.522-2.802-1.002-.094-.246-.5-1.005-.854-1.207-.291-.16-.708-.556-.01-.567.656-.01 1.124.62 1.281.876.75 1.292 1.948.93 2.427.705.073-.555.291-.93.531-1.143-1.854-.213-3.791-.95-3.791-4.218 0-.929.322-1.698.854-2.296-.083-.214-.375-1.09.083-2.265 0 0 .698-.224 2.292.876a7.576 7.576 0 0 1 2.083-.288c.709 0 1.417.096 2.084.288 1.593-1.11 2.291-.875 2.291-.875.459 1.174.167 2.05.084 2.263.53.599.854 1.357.854 2.297 0 3.278-1.948 4.005-3.802 4.219.302.266.563.78.563 1.58 0 1.143-.011 2.061-.011 2.35 0 .224.156.491.573.405a8.365 8.365 0 0 0 4.11-3.116 8.707 8.707 0 0 0 1.567-4.99c0-4.721-3.73-8.545-8.334-8.545Z"></path>
+              </svg> -->
+              <svg viewBox="0 0 20 20" aria-hidden="true" class="h-5 w-5" fill="currentColor">
+                <path d="M16.238 4.515a14.842 14.842 0 0 0-3.664-1.136.055.055 0 0 0-.059.027 10.35 10.35 0 0 0-.456.938 13.702 13.702 0 0 0-4.115 0 9.479 9.479 0 0 0-.464-.938.058.058 0 0 0-.058-.027c-1.266.218-2.497.6-3.664 1.136a.052.052 0 0 0-.024.02C1.4 8.023.76 11.424 1.074 14.782a.062.062 0 0 0 .024.042 14.923 14.923 0 0 0 4.494 2.272.058.058 0 0 0 .064-.02c.346-.473.654-.972.92-1.496a.057.057 0 0 0-.032-.08 9.83 9.83 0 0 1-1.404-.669.058.058 0 0 1-.029-.046.058.058 0 0 1 .023-.05c.094-.07.189-.144.279-.218a.056.056 0 0 1 .058-.008c2.946 1.345 6.135 1.345 9.046 0a.056.056 0 0 1 .059.007c.09.074.184.149.28.22a.058.058 0 0 1 .023.049.059.059 0 0 1-.028.046 9.224 9.224 0 0 1-1.405.669.058.058 0 0 0-.033.033.056.056 0 0 0 .002.047c.27.523.58 1.022.92 1.495a.056.056 0 0 0 .062.021 14.878 14.878 0 0 0 4.502-2.272.055.055 0 0 0 .016-.018.056.056 0 0 0 .008-.023c.375-3.883-.63-7.256-2.662-10.246a.046.046 0 0 0-.023-.021Zm-9.223 8.221c-.887 0-1.618-.814-1.618-1.814s.717-1.814 1.618-1.814c.908 0 1.632.821 1.618 1.814 0 1-.717 1.814-1.618 1.814Zm5.981 0c-.887 0-1.618-.814-1.618-1.814s.717-1.814 1.618-1.814c.908 0 1.632.821 1.618 1.814 0 1-.71 1.814-1.618 1.814Z"></path>
+              </svg>
+              </a>
+              <a
+                href="https://github.com/kagehq/port-kill"
+                target="_blank"
+                class="text-sm font-semibold leading-6 text-gray-500 hover:text-blue-300"
+              >
+                <svg
+                  aria-label="github"
+                  viewBox="0 0 14 14"
+                  class="h-4 w-4"
+                  fill="currentColor"
+                >
+                  <path
+                    d="M7 .175c-3.872 0-7 3.128-7 7 0 3.084 2.013 5.71 4.79 6.65.35.066.482-.153.482-.328v-1.181c-1.947.415-2.363-.941-2.363-.941-.328-.81-.787-1.028-.787-1.028-.634-.438.044-.416.044-.416.7.044 1.071.722 1.071.722.635 1.072 1.641.766 2.035.59.066-.459.24-.765.437-.94-1.553-.175-3.193-.787-3.193-3.456 0-.766.262-1.378.721-1.881-.065-.175-.306-.897.066-1.86 0 0 .59-.197 1.925.722a6.754 6.754 0 0 1 1.75-.24c.59 0 1.203.087 1.75.24 1.335-.897 1.925-.722 1.925-.722.372.963.131 1.685.066 1.86.46.48.722 1.115.722 1.88 0 2.691-1.641 3.282-3.194 3.457.24.219.481.634.481 1.29v1.926c0 .197.131.415.481.328C11.988 12.884 14 10.259 14 7.175c0-3.872-3.128-7-7-7z"
+                    fill="currentColor"
+                    fill-rule="evenodd"
+                  ></path>
+                </svg>
+              </a>
+              <a href="https://x.com/withkage" class="text-gray-500 hover:text-blue-300">
+                <span class="sr-only">X formerly known as Twitter</span>
+                <svg aria-label="X formerly known as Twitter" fill="currentColor" class="h-4 w-4" viewBox="0 0 22 20"><path d="M16.99 0H20.298L13.071 8.26L21.573 19.5H14.916L9.702 12.683L3.736 19.5H0.426L8.156 10.665L0 0H6.826L11.539 6.231L16.99 0ZM15.829 17.52H17.662L5.83 1.876H3.863L15.829 17.52Z" class="astro-3SDC4Q5U"></path></svg>
+              </a>
+            </div>
+          </div>
+        </div>
+      </footer>
     </div>
   </div>
 </template>
