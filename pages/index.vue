@@ -11,7 +11,7 @@
           
           <!-- Main title -->
           <h1 class="text-4xl md:text-5xl font-bold text-blue-300 mb-4">
-            Trumptier
+            Hottake
           </h1>
           
           <!-- Separator -->
@@ -419,18 +419,18 @@ function resetBoard(){
 
 // SEO meta tags for the main page
 useHead({
-  title: 'Trumptier - Create and Share Tier Lists',
+  title: 'Hottake - Create and Share Tier Lists',
   meta: [
     { name: 'description', content: 'Create beautiful tier lists with drag and drop. Share your rankings with friends and discover what others think. Free tier list maker with custom categories.' },
-    { property: 'og:title', content: 'Trumptier - Create and Share Tier Lists' },
+    { property: 'og:title', content: 'Hottake - Create and Share Tier Lists' },
     { property: 'og:description', content: 'Create beautiful tier lists with drag and drop. Share your rankings with friends and discover what others think. Free tier list maker with custom categories.' },
     { property: 'og:image', content: '/api/og?default=true' },
     { property: 'og:image:width', content: '1200' },
     { property: 'og:image:height', content: '630' },
     { property: 'og:type', content: 'website' },
-    { property: 'og:url', content: 'https://trumptier.com' },
+    { property: 'og:url', content: 'https://hottakehq.com' },
     { name: 'twitter:card', content: 'summary_large_image' },
-    { name: 'twitter:title', content: 'Trumptier - Create and Share Tier Lists' },
+    { name: 'twitter:title', content: 'Hottake - Create and Share Tier Lists' },
     { name: 'twitter:description', content: 'Create beautiful tier lists with drag and drop. Share your rankings with friends and discover what others think. Free tier list maker with custom categories.' },
     { name: 'twitter:image', content: '/api/og?default=true' },
     { name: 'keywords', content: 'tier list, ranking, drag and drop, share, create, free, online tool' },

@@ -17,7 +17,7 @@ export default defineEventHandler(async (event) => {
         
         <!-- Title -->
         <text x="600" y="200" text-anchor="middle" fill="white" font-family="system-ui, sans-serif" font-size="56" font-weight="bold">
-          Trumptier
+          Hottake
         </text>
         
         <!-- Subtitle -->
@@ -52,7 +52,7 @@ export default defineEventHandler(async (event) => {
         
         <!-- Footer -->
         <text x="1100" y="590" text-anchor="end" fill="white" font-family="system-ui, sans-serif" font-size="20" opacity="0.7">
-          trumptier.com
+          hottakehq.com
         </text>
       </svg>
     `
@@ -189,7 +189,7 @@ export default defineEventHandler(async (event) => {
       
       <!-- Footer -->
       <text x="1100" y="590" text-anchor="end" fill="white" font-family="system-ui, sans-serif" font-size="20" opacity="0.7">
-        trumptier.com
+        hottakehq.com
       </text>
     </svg>
   `

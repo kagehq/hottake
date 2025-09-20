@@ -1,4 +1,4 @@
-# TrumpTier
+# Hottake
 
 Create and share beautiful tier lists with drag and drop. Rank anything from programming languages to pizza toppings!
 
@@ -21,8 +21,8 @@ Create and share beautiful tier lists with drag and drop. Rank anything from pro
 
 1. **Clone and install:**
 ```bash
-git clone https://github.com/kagehq/trumptier.git
-cd trumptier
+git clone https://github.com/kagehq/hottake.git
+cd hottake
 npm install
 ```
 
@@ -60,45 +60,7 @@ npm run dev
 
 Visit `http://localhost:3000` to start creating tier lists!
 
-## 🛠️ Tech Stack
 
-- **Framework**: Nuxt 4 with Vue 3
-- **Styling**: Tailwind CSS
-- **Database**: Supabase (PostgreSQL)
-- **Drag & Drop**: VueDraggable
-- **Image Export**: html2canvas
-- **URL Compression**: lz-string
-- **Deployment**: Vercel
-
-## 📁 Project Structure
-
-```
-trumptier/
-├── components/          # Vue components
-│   ├── ItemTile.vue    # Individual tier item
-│   └── TierRow.vue     # Tier row with drag/drop
-├── composables/         # Vue composables
-│   └── useTierState.ts # State management
-├── lib/                # Utilities
-│   └── supabase.ts     # Supabase client
-├── pages/              # Nuxt pages
-│   ├── index.vue       # Main editor
-│   └── tierlist/[id].vue # Public view
-├── server/api/         # API endpoints
-│   ├── save.post.ts    # Save tier list
-│   ├── tierlist/[id].get.ts # Get tier list
-│   ├── og.get.ts       # OG image generation
-│   └── storage.ts      # Storage abstraction
-└── types/              # TypeScript types
-    └── tier.ts         # Tier list types
-```
-
-## 🔧 Development
-
-The app uses a hybrid storage approach:
-- **Primary**: Supabase database for persistence
-- **Fallback**: File system for development
-- **Cache**: In-memory for performance
 
 ## 📝 License
 
