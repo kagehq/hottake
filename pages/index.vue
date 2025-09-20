@@ -146,7 +146,8 @@
             </div>
             <input v-model="url" 
                    placeholder="https://example.com/image.jpg" 
-                   class="w-full bg-gray-500/5 text-white placeholder-gray-500 outline-none border border-gray-500/10 rounded-lg px-3 py-2 text-sm focus:border-gray-500/10 focus:ring-1 focus:ring-gray-500/10 transition-all duration-200 flex-1"/>
+                   class="w-full bg-gray-500/5 text-white placeholder-gray-500 outline-none border border-gray-500/10 rounded-lg px-3 py-2 focus:border-gray-500/10 focus:ring-1 focus:ring-gray-500/10 transition-all duration-200 flex-1"
+                   style="font-size: 16px;" />
             <button @click="addUrl" 
                     class="w-full px-3 py-2 bg-gray-500/10 hover:bg-gray-500/15 text-white rounded-xl border border-gray-500/10 transition-all duration-200 font-medium text-sm flex items-center justify-center gap-2">
               <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -413,6 +414,7 @@ async function exportPng(){
     setTimeout(() => { exportButtonText.value = "Export"; }, 2000);
   }
 }
+
 async function shareTierList(){
   // Don't proceed if no items
   if (!hasItems.value) return;
@@ -431,17 +433,119 @@ async function shareTierList(){
     
     if (response.success) {
       const publicUrl = `${window.location.origin}/tierlist/${response.id}`;
-      console.log('Copying URL:', publicUrl);
       
-      // Use setTimeout to maintain user interaction context for Safari
-      setTimeout(() => {
-        tryClipboardCopy(publicUrl);
-      }, 0);
+      // Check if it's Safari
+      const isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
       
-      // Reset button text after 2 seconds
-      setTimeout(() => {
-        shareButtonText.value = "Share";
-      }, 2000);
+      if (isSafari) {
+        // For Safari: show a clean modal for copying
+        const overlay = document.createElement('div');
+        overlay.style.position = 'fixed';
+        overlay.style.top = '0';
+        overlay.style.left = '0';
+        overlay.style.width = '100%';
+        overlay.style.height = '100%';
+        overlay.style.backgroundColor = 'rgba(0, 0, 0, 0.5)';
+        overlay.style.zIndex = '10000';
+        overlay.style.display = 'flex';
+        overlay.style.alignItems = 'center';
+        overlay.style.justifyContent = 'center';
+        
+        const modal = document.createElement('div');
+        modal.style.backgroundColor = 'black';
+        modal.style.padding = '15px';
+        modal.style.borderRadius = '12px';
+        modal.style.border = '1px solid #f9fafb1a';
+        modal.style.boxShadow = '0 10px 25px rgba(0, 0, 0, 0.3)';
+        modal.style.maxWidth = '90%';
+        modal.style.width = '360px';
+        
+        const title = document.createElement('h3');
+        title.textContent = 'Copy URL to share your tier list';
+        title.style.margin = '0 0 16px 0';
+        title.style.fontSize = '15px';
+        title.style.fontWeight = '400';
+        title.style.color = '#ffffff';
+        
+        const input = document.createElement('input');
+        input.value = publicUrl;
+        input.style.width = '100%';
+        input.style.padding = '10px';
+        input.style.border = '1px solid #f9fafb1a';
+        input.style.borderRadius = '8px';
+        input.style.fontSize = '16px'; // 16px prevents zoom on mobile
+        input.style.backgroundColor = '#6b72801a';
+        input.style.color = '#ffffff';
+        input.style.marginBottom = '16px';
+        input.readOnly = true;
+        
+        const button = document.createElement('button');
+        button.textContent = 'Close';
+        button.style.padding = '10px 20px';
+        button.style.backgroundColor = '#93c5fd';
+        button.style.color = '#000000';
+        button.style.border = 'none';
+        button.style.borderRadius = '6px';
+        button.style.cursor = 'pointer';
+        button.style.fontSize = '14px';
+        button.style.fontWeight = '500';
+        
+        modal.appendChild(title);
+        modal.appendChild(input);
+        modal.appendChild(button);
+        overlay.appendChild(modal);
+        document.body.appendChild(overlay);
+        
+        // Focus and select the input
+        input.focus();
+        input.select();
+        
+        // Close modal when button is clicked
+        button.onclick = () => {
+          document.body.removeChild(overlay);
+          shareButtonText.value = "Share";
+        };
+        
+        // Close modal when clicking overlay
+        overlay.onclick = (e) => {
+          if (e.target === overlay) {
+            document.body.removeChild(overlay);
+            shareButtonText.value = "Share";
+          }
+        };
+        
+        shareButtonText.value = "Copied!";
+      } else {
+        // For other browsers: use the working clipboard API
+        try {
+          await navigator.clipboard.writeText(publicUrl);
+          shareButtonText.value = "Copied!";
+        } catch (err) {
+          // Fallback for browsers that don't support clipboard API
+          const textArea = document.createElement('textarea');
+          textArea.value = publicUrl;
+          textArea.style.position = 'fixed';
+          textArea.style.left = '-999999px';
+          textArea.style.top = '-999999px';
+          document.body.appendChild(textArea);
+          textArea.focus();
+          textArea.select();
+          
+          try {
+            document.execCommand('copy');
+            shareButtonText.value = "Copied!";
+          } catch (err) {
+            shareButtonText.value = "Failed";
+          }
+          
+          document.body.removeChild(textArea);
+        }
+        
+        // Reset button text after 2 seconds
+        setTimeout(() => {
+          shareButtonText.value = "Share";
+        }, 2000);
+      }
     }
   } catch (error) {
     console.error('Failed to share tier list:', error);
@@ -454,59 +558,6 @@ async function shareTierList(){
   }
 }
 
-// Try clipboard copy with fallback
-async function tryClipboardCopy(text: string) {
-  console.log('tryClipboardCopy called with:', text);
-  // For Safari, we need to ensure the clipboard API has proper permissions
-  if (navigator.clipboard && navigator.clipboard.writeText) {
-    try {
-      // Request permission explicitly for Safari
-      if (navigator.permissions) {
-        const permission = await navigator.permissions.query({ name: 'clipboard-write' as PermissionName });
-        if (permission.state === 'denied') {
-          throw new Error('Clipboard permission denied');
-        }
-      }
-      
-      await navigator.clipboard.writeText(text);
-      shareButtonText.value = "Copied!";
-      return;
-    } catch (clipboardError) {
-      console.log('Clipboard API failed, trying fallback:', clipboardError);
-    }
-  }
-  
-  // Fallback to legacy method - let the fallback function handle the button text
-  fallbackCopyToClipboard(text);
-}
-
-// Fallback copy method that works in Safari and mobile
-function fallbackCopyToClipboard(text: string) {
-  // Simple hidden textarea approach
-  const textArea = document.createElement('textarea');
-  textArea.value = text;
-  textArea.style.position = 'fixed';
-  textArea.style.left = '-9999px';
-  textArea.style.top = '-9999px';
-  textArea.style.opacity = '0';
-  textArea.style.pointerEvents = 'none';
-  textArea.setAttribute('readonly', '');
-  
-  document.body.appendChild(textArea);
-  textArea.focus();
-  textArea.select();
-  textArea.setSelectionRange(0, 99999);
-  
-  try {
-    const successful = document.execCommand('copy');
-    shareButtonText.value = "Copied!";
-  } catch (err) {
-    console.error('Copy failed:', err);
-    shareButtonText.value = "Copied!";
-  }
-  
-  document.body.removeChild(textArea);
-}
 function resetBoard(){
   clearData();
 }
