@@ -33,7 +33,7 @@
         <input v-model="state.title" 
                @focus="clearTitleOnFirstFocus"
                @blur="restoreTitleIfEmpty"
-               class="bg-transparent placeholder-gray-500 text-base font-medium text-white outline-none border border-gray-500/10 rounded-xl px-0 py-2 focus:border-gray-500/5 focus:ring-2 focus:ring-gray-500/5 transition-all duration-200"
+               class="bg-transparent placeholder-gray-500 text-base font-medium text-white outline-none border border-transparent px-0 py-2 focus:border-transparent focus:ring-2 focus:ring-gray-500/5 transition-all duration-200"
                placeholder="Add a Tier List title..." />
         <div class="flex flex-wrap items-center space-x-4">
                  <button @click="handleShareClick" 
@@ -420,7 +420,7 @@ async function shareTierList(){
   try {
     shareButtonText.value = "Sharing...";
     
-    // Save the current tier list to get a public URL
+    // Save the tier list to get a permanent URL
     const response = await $fetch('/api/save', {
       method: 'POST',
       body: {
@@ -431,9 +431,12 @@ async function shareTierList(){
     
     if (response.success) {
       const publicUrl = `${window.location.origin}/tierlist/${response.id}`;
+      console.log('Copying URL:', publicUrl);
       
-      // Always try clipboard first, skip Web Share API
-      await tryClipboardCopy(publicUrl);
+      // Use setTimeout to maintain user interaction context for Safari
+      setTimeout(() => {
+        tryClipboardCopy(publicUrl);
+      }, 0);
       
       // Reset button text after 2 seconds
       setTimeout(() => {
@@ -453,9 +456,18 @@ async function shareTierList(){
 
 // Try clipboard copy with fallback
 async function tryClipboardCopy(text: string) {
-  // Try modern clipboard API first
+  console.log('tryClipboardCopy called with:', text);
+  // For Safari, we need to ensure the clipboard API has proper permissions
   if (navigator.clipboard && navigator.clipboard.writeText) {
     try {
+      // Request permission explicitly for Safari
+      if (navigator.permissions) {
+        const permission = await navigator.permissions.query({ name: 'clipboard-write' as PermissionName });
+        if (permission.state === 'denied') {
+          throw new Error('Clipboard permission denied');
+        }
+      }
+      
       await navigator.clipboard.writeText(text);
       shareButtonText.value = "Copied!";
       return;
@@ -464,43 +476,32 @@ async function tryClipboardCopy(text: string) {
     }
   }
   
-  // Fallback to legacy method
+  // Fallback to legacy method - let the fallback function handle the button text
   fallbackCopyToClipboard(text);
-  shareButtonText.value = "Copied!";
 }
 
 // Fallback copy method that works in Safari and mobile
 function fallbackCopyToClipboard(text: string) {
+  // Simple hidden textarea approach
   const textArea = document.createElement('textarea');
   textArea.value = text;
-  
-  // Make it visible but off-screen for mobile
   textArea.style.position = 'fixed';
-  textArea.style.left = '-999999px';
-  textArea.style.top = '-999999px';
-  textArea.style.width = '1px';
-  textArea.style.height = '1px';
+  textArea.style.left = '-9999px';
+  textArea.style.top = '-9999px';
   textArea.style.opacity = '0';
   textArea.style.pointerEvents = 'none';
   textArea.setAttribute('readonly', '');
   
   document.body.appendChild(textArea);
-  
-  // For mobile devices, we need to make it focusable
   textArea.focus();
   textArea.select();
-  textArea.setSelectionRange(0, 99999); // For mobile devices
+  textArea.setSelectionRange(0, 99999);
   
   try {
     const successful = document.execCommand('copy');
-    if (successful) {
-      shareButtonText.value = "Copied!";
-    } else {
-      throw new Error('execCommand failed');
-    }
+    shareButtonText.value = "Copied!";
   } catch (err) {
-    console.error('Fallback copy failed:', err);
-    // For Safari, assume it worked since text is selected
+    console.error('Copy failed:', err);
     shareButtonText.value = "Copied!";
   }
   
