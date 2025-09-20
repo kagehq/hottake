@@ -25,3 +25,6 @@ logs
 
 # Tier list data
 data/
+
+# Supabase schema (not needed in repo)
+supabase-schema.sql

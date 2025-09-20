@@ -1,3 +1,5 @@
+import { supabase, type TierListRow } from '~/lib/supabase'
+
 // Simple storage abstraction that can be easily swapped
 export interface TierListData {
   id: string;
@@ -22,8 +24,30 @@ export class StorageService {
     // Store in memory cache
     this.cache.set(data.id, data);
     
-    // For now, we'll use the file system approach
-    // In production, this would connect to a database
+    // Try Supabase first
+    try {
+      const { error } = await supabase
+        .from('tier_lists')
+        .upsert({
+          id: data.id,
+          state: data.state,
+          remix_of: data.remixOf,
+          created_at: data.createdAt,
+          updated_at: data.updatedAt
+        });
+
+      if (error) {
+        console.error('Supabase save error:', error);
+        throw error;
+      }
+      
+      console.log(`Saved tier list ${data.id} to Supabase`);
+      return;
+    } catch (error) {
+      console.warn('Supabase save failed, falling back to file system:', error);
+    }
+    
+    // Fallback to file system
     try {
       const fs = await import('fs/promises');
       const path = await import('path');
@@ -44,9 +68,10 @@ export class StorageService {
       
       // Write back
       await fs.writeFile(tierListsFile, JSON.stringify(allTierLists, null, 2));
+      console.log(`Saved tier list ${data.id} to file system (fallback)`);
     } catch (error) {
       console.error('Failed to save to file system:', error);
-      // In production, this would fall back to database
+      throw new Error('Failed to save tier list');
     }
   }
 
@@ -56,7 +81,38 @@ export class StorageService {
       return this.cache.get(id)!;
     }
 
-    // Try to load from file system
+    // Try Supabase first
+    try {
+      const { data: row, error } = await supabase
+        .from('tier_lists')
+        .select('*')
+        .eq('id', id)
+        .single();
+
+      if (error) {
+        console.error('Supabase get error:', error);
+        throw error;
+      }
+
+      if (row) {
+        const tierListData: TierListData = {
+          id: row.id,
+          state: row.state,
+          remixOf: row.remix_of,
+          createdAt: row.created_at,
+          updatedAt: row.updated_at
+        };
+        
+        // Cache for future requests
+        this.cache.set(id, tierListData);
+        console.log(`Loaded tier list ${id} from Supabase`);
+        return tierListData;
+      }
+    } catch (error) {
+      console.warn('Supabase get failed, falling back to file system:', error);
+    }
+
+    // Fallback to file system
     try {
       const fs = await import('fs/promises');
       const path = await import('path');
@@ -69,6 +125,7 @@ export class StorageService {
       if (data) {
         // Cache for future requests
         this.cache.set(id, data);
+        console.log(`Loaded tier list ${id} from file system (fallback)`);
         return data;
       }
     } catch (error) {
@@ -81,6 +138,25 @@ export class StorageService {
   async delete(id: string): Promise<void> {
     this.cache.delete(id);
     
+    // Try Supabase first
+    try {
+      const { error } = await supabase
+        .from('tier_lists')
+        .delete()
+        .eq('id', id);
+
+      if (error) {
+        console.error('Supabase delete error:', error);
+        throw error;
+      }
+      
+      console.log(`Deleted tier list ${id} from Supabase`);
+      return;
+    } catch (error) {
+      console.warn('Supabase delete failed, falling back to file system:', error);
+    }
+    
+    // Fallback to file system
     try {
       const fs = await import('fs/promises');
       const path = await import('path');
@@ -91,6 +167,7 @@ export class StorageService {
       delete allTierLists[id];
       
       await fs.writeFile(tierListsFile, JSON.stringify(allTierLists, null, 2));
+      console.log(`Deleted tier list ${id} from file system (fallback)`);
     } catch (error) {
       console.error('Failed to delete from file system:', error);
     }
