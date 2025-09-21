@@ -33,7 +33,7 @@
         <input v-model="state.title" 
                @focus="clearTitleOnFirstFocus"
                @blur="restoreTitleIfEmpty"
-               class="bg-transparent placeholder-gray-500 text-base font-medium text-white outline-none border border-transparent px-0 py-2 focus:border-transparent focus:ring-2 focus:ring-gray-500/5 transition-all duration-200"
+               class="bg-transparent placeholder-gray-500 text-base font-medium text-white outline-none border border-transparent px-0 py-2 focus:border-transparent focus:ring-2 focus:ring-transparent transition-all duration-200 w-full sm:w-60"
                placeholder="Add a Tier List title..." />
         <div class="flex flex-wrap items-center space-x-4">
                  <button @click="handleShareClick" 
