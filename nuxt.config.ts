@@ -9,4 +9,15 @@ export default defineNuxtConfig({
       autoprefixer: {},
     },
   },
+  app: {
+    head: {
+      script: [
+        {
+          src: 'https://cdn.seline.com/seline.js',
+          'data-token': 'debef75406a5780',
+          async: true
+        }
+      ]
+    }
+  }
 });

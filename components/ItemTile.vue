@@ -21,7 +21,7 @@
     
     <!-- Text-only items: Compact container -->
     <div v-else class="flex items-center gap-3 text-white px-2 py-1">
-      <div class="truncate leading-7">{{ item.label }}</div>
+      <div class="truncate leading-8">{{ item.label }}</div>
     </div>
     
     <!-- Delete button (appears on hover) -->
