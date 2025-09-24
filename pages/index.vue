@@ -190,7 +190,7 @@
               </svg>
               </a>
               <a
-                href="https://github.com/kagehq/port-kill"
+                href="https://github.com/kagehq/hottake"
                 target="_blank"
                 class="text-sm font-semibold leading-6 text-gray-500 hover:text-blue-300"
               >
